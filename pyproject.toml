@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sadtalker"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.10"
+authors = [{name = "tien02"}]
+
+[tool.setuptools.packages.find]
+exclude = ["*.yaml", "*.yml", "test*", "storage*", "scripts*", "docs*", "datasets*"]

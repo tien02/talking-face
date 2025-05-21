@@ -1,0 +1,2 @@
+CUDA_VISIBLE_DEVICES=1 python inference_trt.py --driven_audio examples/audio.wav --source_image examples/avatar.png --still --preprocess full --batch_size 8
+# CUDA_VISIBLE_DEVICES=1 python inference.py --driven_audio examples/audio.wav --source_image examples/avatar.jpeg --still --preprocess full --batch_size 8
