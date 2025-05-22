@@ -1,6 +1,6 @@
 import torch
-from src.utils.init_path import init_path
-from src.facerender.animate import AnimateFromCoeff
+from src.sadtalker.utils.init_path import init_path
+from src.sadtalker.facerender.animate import AnimateFromCoeff
 
 source_image_path = 'tensorrt/source_image.pt'
 kp_driving_path = 'tensorrt/kp_driving.pt'
