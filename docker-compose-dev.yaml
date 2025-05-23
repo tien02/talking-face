@@ -1,0 +1,13 @@
+services:
+  avagen:
+    ports:
+      - 8091:8091
+      - 8625:8625
+    volumes:
+      - ./checkpoints:/module/checkpoints
+      - ./gfpgan:/module/gfpgan
+      - ./test:/module/test
+
+networks:
+  vnet:
+  
