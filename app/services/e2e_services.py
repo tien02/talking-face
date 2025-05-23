@@ -1,28 +1,7 @@
-# import base64
-
-# from ray import serve
-# from ray.serve.handle import DeploymentHandle
-
-# @serve.deployment(ray_actor_options={"num_cpus": 0.5})
-# class VideoGenerator:
-#     def __init__(self, tts_handle:DeploymentHandle, sadtalker_handle:DeploymentHandle):
-#         self.tts = tts_handle
-#         self.sadtalker = sadtalker_handle
-
-#     async def __call__(self, text: str, speaker_id: str, image_bytes: bytes):
-
-#         # Step 1: Text → Speech
-#         audio_base64: str = await self.tts.remote(text, speaker_id)
-#         audio_bytes = base64.b64decode(audio_base64)
-
-#         # Step 2: Speech + Image → Video
-#         video_base64: str = await self.sadtalker.remote(audio_bytes, image_bytes)
-
-#         return {"video_base64": video_base64}
-
 from ray import serve
 from ray.serve.handle import DeploymentHandle
 from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import base64
 
@@ -52,11 +31,11 @@ class VideoGenerator:
 
         # Call SadTalker
         video_response: dict = await self.sadtalker.remote(audio_bytes, image_bytes)
+        video_path:str = video_response.output_video
 
-        video_path = video_response.output_video
+        # Open file and stream
+        def iterfile():
+            with open(video_path, mode="rb") as file_like:
+                yield from file_like
 
-        with open(video_path, "rb") as f:
-            video_bytes = f.read()
-        video_base64 = base64.b64encode(video_bytes).decode("utf-8")
-
-        return {"video_base64": video_base64, "total_time": video_response.total_time}
+        return StreamingResponse(iterfile(), media_type="video/mp4")
