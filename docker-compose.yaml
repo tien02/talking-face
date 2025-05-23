@@ -55,8 +55,10 @@ services:
       dockerfile: ./Dockerfile
     container_name: avagen
     env_file: ./.env
-    command:
-      ["serve", "run", "ray_serve_config.yaml"]
+    command: >
+      bash -c "
+      ray start --head --dashboard-host=0.0.0.0 &&
+      serve run ray_serve_config.yaml"
     restart: unless-stopped
     labels:
       - "logging=promtail"
