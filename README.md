@@ -10,32 +10,91 @@ This project supports using [SadTalker](https://github.com/OpenTalker/SadTalker)
 
 Whether you want to convert text into talking avatars or bring portraits to life with synced speech, **TalkingFace** makes the entire process streamlined and accessible.
 
+<video width="640" controls>
+  <source src="https://github.com/tien02/talking-face/blob/main/examples/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ---
 
-## ⚙️ Installation
-
-```bash
-conda create -n talkinghead python=3.10 -y
-
-conda activate talkinghead
-
-pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
-
-conda install ffmpeg
-
-pip install -r requirements.txt
-````
-
-## Download models
+## 💾 Download models
 Run the following script to automatically download all the models:
 ```bash
 bash scripts/download_models.sh
 ```
+
 ---
 
-## 🛠️ How to Use
+## 🚀 Run the Application
 
-### 1. Export the Generator to TensorRT
+**Prerequisites:**
+Ensure that the following are properly installed and configured:
+
+* [Docker](https://www.docker.com/)
+* [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/overview.html) (for GPU support)
+
+---
+
+To start the application, run:
+
+```bash
+bash scripts/dev.sh
+```
+
+This will launch a **FastAPI** server on port **8091**.
+
+### 🔍 Additional Interfaces
+
+* **Ray Dashboard**: [http://localhost:8625](http://localhost:8625)
+  Monitor and manage distributed tasks and resources.
+
+* **Grafana Logs**: [http://localhost:3000](http://localhost:3000)
+  Visualize metrics and logs.
+
+---
+
+## 🧪 Test the Video Generation Service
+
+After running the application, you can verify that the service is working correctly by generating a sample video.
+
+### ✅ Option 1: Run the Test Script
+
+A test script is available to send a request to the FastAPI server and save the generated video locally:
+
+```bash
+python test/test_video_generator.py
+```
+
+This script:
+
+* Sends a request to the `/generate` endpoint with a sample image and text.
+* Streams the generated video response.
+* Saves the result to `output_video.mp4`.
+* Prints the total response time.
+
+Ensure the image file `examples/avatar.png` exists before running the script.
+
+---
+
+### ✅ Option 2: Test via `curl`
+
+If you prefer using `curl`, you can encode the image manually and run:
+
+```bash
+curl -X POST http://0.0.0.0:8091/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Hello, this is a test of real-time video generation.",
+    "speaker_id": "random",
+    "image_bytes": "<base64-encoded-avatar.png>"
+  }' --output output_video.mp4
+```
+
+> Replace `<base64-encoded-avatar.png>` with the base64 string of your image file (e.g., using `base64 examples/avatar.png` in Unix systems).
+
+---
+
+## Export the Generator to TensorRT (Optional)
 
 1. Export to ONNX
 
@@ -61,19 +120,7 @@ make
 sh to_trt.sh
 ```
 
-This will generate a `model.engine` file optimized for fast inference.
-
-### 2. Run Inference
-
-```bash
-python inference_trt.py \
-    --driven_audio examples/audio.wav \
-    --source_image examples/avatar.png \
-    --still --preprocess full \
-    --batch_size 8
-```
-
-You'll see your input image come to life, it may take some time!
+This will generate a `model.engine` file optimized for fast inference. Modify the `use_trt`  to True.
 
 ---
 
