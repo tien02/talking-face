@@ -43,6 +43,6 @@ def gen_composed_video(args, device, first_frame_coeff, coeff_path, audio_path, 
 
     video.release()
 
-    command = 'ffmpeg -v quiet -y -i {} -i {} -strict -2 -q:v 1 {}'.format(audio_path, tmp_video_path, save_path)
+    command = 'ffmpeg -v quiet -y -i {} -i {} -c:v copy -c:a aac -shortest -q:v 1 {}'.format(audio_path, tmp_video_path, save_path)
     subprocess.call(command, shell=platform.system() != 'Windows')
 
