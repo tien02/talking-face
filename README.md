@@ -10,11 +10,6 @@ This project supports using [SadTalker](https://github.com/OpenTalker/SadTalker)
 
 Whether you want to convert text into talking avatars or bring portraits to life with synced speech, **TalkingFace** makes the entire process streamlined and accessible.
 
-<video width="640" controls>
-  <source src="https://github.com/tien02/talking-face/blob/main/examples/demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
 ---
 
 ## 💾 Download models
@@ -51,32 +46,52 @@ This will launch a **FastAPI** server on port **8091**.
 * **Grafana Logs**: [http://localhost:3000](http://localhost:3000)
   Visualize metrics and logs.
 
+* **FastAPI documents** [http://localhost:8091/docs](http://localhost:8091/docs) Swagger UI:
+
+<p align="center">
+  <img src="docs/fastapi_docs.png" alt="Image 1" width="75%" />
+</p>
 ---
 
 ## 🧪 Test the Video Generation Service
 
 After running the application, you can verify that the service is working correctly by generating a sample video.
 
-### ✅ Option 1: Run the Test Script
+### ✅ Option 1: Launch the Gradio Demo
 
-A test script is available to send a request to the FastAPI server and save the generated video locally:
+Run the following command to start the Gradio-based interface:
 
 ```bash
-python test/test_video_generator.py
+python app/gradio_demo.py
 ```
 
-This script:
+Then open your browser and navigate to:
+👉 [http://localhost:7680](http://localhost:7680)
 
-* Sends a request to the `/generate` endpoint with a sample image and text.
-* Streams the generated video response.
-* Saves the result to `output_video.mp4`.
-* Prints the total response time.
-
-Ensure the image file `examples/avatar.png` exists before running the script.
+<p align="center">
+  <img src="docs/gradio_demo.png" alt="Gradio Demo Screenshot" width="75%" />
+</p>
 
 ---
 
-### ✅ Option 2: Test via `curl`
+### ✅ Option 2: Launch the WebRTC App
+
+Run the following command to start the WebRTC-based frontend:
+
+```bash
+python app/fe_app.py
+```
+
+Then open your browser and navigate to:
+👉 [http://localhost:3003](http://localhost:3003)
+
+<p align="center">
+  <img src="docs/webrtc_demo.png" alt="WebRTC Demo Screenshot" width="75%" />
+</p>
+
+---
+
+### ✅ Option 3: Test via `curl`
 
 If you prefer using `curl`, you can encode the image manually and run:
 
