@@ -1,7 +1,9 @@
+import json
 import uuid
 import base64
 import asyncio
 import aiofiles
+from redis.asyncio import Redis
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,10 +15,15 @@ from ray.serve.handle import DeploymentHandle
 from aiortc.contrib.media import MediaPlayer
 from aiortc import RTCPeerConnection, RTCSessionDescription
 
-from typing import Dict
+from config.app import app_settings
 from schemas.app import GenerationRequest, StreamRequest
 
 app = FastAPI()
+redis_client = Redis(
+    host=app_settings.REDIS_HOST,
+    port=app_settings.REDIS_PORT,
+    db=app_settings.REDIS_DB
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,7 +35,6 @@ app.add_middleware(
 
 pcs = set() 
 CHUNK_SIZE = 1024 * 1024
-video_sessions: Dict[str, Dict] = {}
 
 @serve.deployment(ray_actor_options={"num_cpus": 0.5})
 @serve.ingress(app)
@@ -69,10 +75,14 @@ class VideoGenerator:
 
         session_id = str(uuid.uuid4())
         video_path = f"/tmp/{session_id}.mp4"
-        video_sessions[session_id] = {
-            "status": "processing",
-            "video_path": video_path
-        }
+        
+        await redis_client.set(
+            session_id,
+            json.dumps({
+                "status": "processing",
+                "video_path": video_path
+            })
+        )
 
         async def run_generation():
             try:
@@ -80,11 +90,18 @@ class VideoGenerator:
                 audio_bytes = base64.b64decode(audio_base64)
 
                 video_response: dict = await self.sadtalker.remote(audio_bytes, image_bytes)
-                video_sessions[session_id]["video_path"] = video_response.output_video
-                video_sessions[session_id]["status"] = "ready"
+                updated_session = {
+                    "status": "ready",
+                    "video_path": video_response.output_video
+                }
             except Exception as e:
-                video_sessions[session_id]["status"] = "failed"
                 print(f"Generation failed for {session_id}: {e}")
+                updated_session = {
+                    "status": "failed",
+                    "video_path": video_path
+                }
+            
+            await redis_client.set(session_id, json.dumps(updated_session))
 
         asyncio.create_task(run_generation())
 
@@ -93,21 +110,29 @@ class VideoGenerator:
     @app.post("/stream")
     async def stream(self, stream_request: StreamRequest):
         session_id = stream_request.session_id
-        if session_id not in video_sessions:
+        session_data = await redis_client.get(session_id)
+
+        if session_data is None:
             raise HTTPException(status_code=404, detail="Session not found")
 
         # Poll for readiness
         for _ in range(60):
-            session = video_sessions[session_id]
+            session_data = await redis_client.get(session_id)
+            if session_data is None:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = json.loads(session_data)
+
             if session["status"] == "ready":
                 break
             elif session["status"] == "failed":
                 raise HTTPException(status_code=500, detail="Generation failed")
+            
             await asyncio.sleep(0.5)
         else:
             raise HTTPException(status_code=504, detail="Timeout: video not ready")
 
-        video_path = video_sessions[session_id]["video_path"]
+        video_path = session["video_path"]
 
         pc = RTCPeerConnection()
         pcs.add(pc)  # optional if you maintain a set of connections
