@@ -17,8 +17,8 @@ from config.video import video_settings
 class SadTalkerAnimator:
     def __init__(self, batch_size=video_settings.VIDEO_BATCH_SIZE, enhancer=None,
                  checkpoint_dir='./checkpoints', result_dir='./results', device=video_settings.VIDEO_DEVICE,
-                 size=256, preprocess='full', old_version=False, background_enhancer=None,
-                 pose_style=0, expression_scale=1.0, still=True, face3dvis=False,
+                 size=512, preprocess='full', old_version=False, background_enhancer=None,
+                 pose_style=0, expression_scale=1.0, still=False, face3dvis=False,
                  input_yaw=None, input_pitch=None, input_roll=None, verbose=False,
                  ref_eyeblink=None, ref_pose=None, use_trt=video_settings.USE_VIDEO_TRT_MODEL):
         
