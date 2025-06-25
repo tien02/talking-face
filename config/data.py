@@ -7,5 +7,10 @@ class DataSettings(BaseSettings):
     MINIO_HOST: str
     MINIO_USER_NAME: str
     MINIO_USER_PWD: str
+    MINIO_BUCKET: str
+
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
 
 data_settings = DataSettings()
