@@ -4,8 +4,7 @@ from typing import Optional, Literal
 
 class GenerationRequest(BaseModel):
     text: str
-    speaker_id: str
-    image_bytes: str
+    speaker_id: Literal['male', 'female', 'random']
 
 class GetGenerationStatus(BaseModel):
     status: Literal['STARTED', 'SUCCESS', 'FAIL']

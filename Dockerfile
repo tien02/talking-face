@@ -51,6 +51,7 @@ RUN pip install -r requirements.txt
 
 WORKDIR /module/src
 COPY ./app /module/app
+COPY ./assets /module/assets
 COPY ./common /module/common
 COPY ./config /module/config
 COPY ./schemas /module/schemas

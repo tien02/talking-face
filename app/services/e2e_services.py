@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ray import serve
 from ray.serve.handle import DeploymentHandle
 
+from common.face import INTERVIEWER_AVATAR
 from config.data import data_settings
 from schemas.app import GenerationRequest, GetGenerationStatus
 
@@ -37,7 +38,10 @@ class VideoGenerator:
     async def generate(self, inp: GenerationRequest):
         text = inp.text
         speaker_id = inp.speaker_id
-        image_bytes = base64.b64decode(inp.image_bytes)
+
+        image_path = INTERVIEWER_AVATAR.get(speaker_id, INTERVIEWER_AVATAR["random"])
+        with open(image_path, "rb") as f:
+            image_bytes = f.read()
 
         # Call TTS service
         audio_base64: str = await self.tts.remote(text, speaker_id)
@@ -48,7 +52,7 @@ class VideoGenerator:
 
         return video_gen_resp
 
-    @app.get("/stream")
+    @app.get("/video")
     async def stream(self, session_id) -> GetGenerationStatus:
         session_data = await redis_client.get(session_id)
 

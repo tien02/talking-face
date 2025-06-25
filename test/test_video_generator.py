@@ -7,14 +7,9 @@ import base64
 text = "Hello, this is a test of real-time video generation."
 speaker_id = "random"
 
-with open("examples/avatar.png", "rb") as f:
-    image_bytes = f.read()
-image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-
 payload = {
     "text": text,
     "speaker_id": speaker_id,
-    "image_bytes": image_base64
 }
 
 start = time.time()
