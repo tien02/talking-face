@@ -1,3 +1,4 @@
+import json
 import time
 import requests
 import base64
@@ -18,16 +19,31 @@ payload = {
 
 start = time.time()
 
-response = requests.post("http://0.0.0.0:8091/generate", json=payload, stream=True)
+response = requests.post("http://0.0.0.0:8091/generate", json=payload)
 
 total_time = time.time() - start
 
 if response.status_code == 200:
-    with open("output_video.mp4", "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:  # filter out keep-alive chunks
-                f.write(chunk)
-    print("Video saved to output_video.mp4")
+    print(response.text)
+
+    reponse_data = json.loads(response.text)
+
+    while True:
+        response = requests.get(f"http://0.0.0.0:8091/video?session_id={reponse_data['session_id']}")
+
+        print(response)
+
+        if response.status_code==200:
+            print(response.text)
+
+            response_data = json.loads(response.text)
+
+            if response_data is not None:
+                if response_data['status'] == "SUCCESS":
+                    print("Finish")
+                    break
+
+        time.sleep(2)
 else:
     print("Request failed:", response.status_code, response.text)
 

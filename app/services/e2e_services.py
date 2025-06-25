@@ -4,7 +4,6 @@ from redis.asyncio import Redis
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
 
 from ray import serve
 from ray.serve.handle import DeploymentHandle
@@ -49,7 +48,7 @@ class VideoGenerator:
 
         return video_gen_resp
 
-    @app.get("/video")
+    @app.get("/stream")
     async def stream(self, session_id) -> GetGenerationStatus:
         session_data = await redis_client.get(session_id)
 
