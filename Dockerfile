@@ -48,6 +48,7 @@ WORKDIR /module
 COPY ./requirements.txt ./
 
 RUN pip install -r requirements.txt
+RUN pip install weaviate-client==4.15.3
 
 WORKDIR /module/src
 COPY ./app /module/app

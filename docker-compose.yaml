@@ -105,7 +105,7 @@ services:
     command: server /data --console-address ":9001"
   
   t2v-transformers:
-    image: cr.weaviate.io/semitechnologies/transformers-inference:snowflake-snowflake-arctic-embed-s
+    image: cr.weaviate.io/semitechnologies/transformers-inference:sentence-transformers-paraphrase-multilingual-MiniLM-L12-v2
     container_name: t2v-transformers
     environment:
       NVIDIA_VISIBLE_DEVICES: all
@@ -121,13 +121,14 @@ services:
       - --host
       - 0.0.0.0
       - --port
-      - '8080'
+      - '8060'
       - --scheme
       - http
     image: cr.weaviate.io/semitechnologies/weaviate:1.31.2
     container_name: weaviate
+    hostname: weaviate
     ports:
-      - 8080:8080
+      - 8060:8060
       - 50051:50051
     volumes:
       - weaviate_data:/var/lib/weaviate
@@ -141,6 +142,7 @@ services:
       ENABLE_MODULES: text2vec-transformers
       TRANSFORMERS_INFERENCE_API: http://t2v-transformers:8080
       AUTOSCHEMA_ENABLED: 'false'
+      CLUSTER_HOSTNAME: node1
     labels:
       - "logging=promtail"
     networks:

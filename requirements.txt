@@ -26,4 +26,3 @@ redis==5.2.1
 minio==7.2.13
 ray[default]==2.46.0
 watchfiles==1.0.5
-redis==5.2.1
