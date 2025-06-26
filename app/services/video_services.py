@@ -6,10 +6,9 @@ import logging
 
 from ray import serve
 from redis.asyncio import Redis
-from fastapi.responses import JSONResponse
 
 from config.data import data_settings
-from src.data.minio import MinioClient
+from src.data.object_storage import MinioClient
 from src.video_engine import SadTalkerAnimator, SadTalkerAnimatorInput, SadTalkerAnimatorResponse
 
 @serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 4, "num_gpus": 1})
@@ -27,7 +26,8 @@ class SadTalkerDeployment:
     async def __call__(
             self, 
             audio_bytes: bytes, 
-            image_bytes: bytes, 
+            image_bytes: bytes,
+            session_id: str 
         ):
         uid = str(uuid.uuid4())
         audio_path = f"/tmp/audio_{uid}.wav"
@@ -35,18 +35,7 @@ class SadTalkerDeployment:
         with open(audio_path, "wb") as f: f.write(audio_bytes)
         with open(image_path, "wb") as f: f.write(image_bytes)
 
-        session_id = str(uuid.uuid4())
-        output_path = os.path.join(data_settings.MINIO_BUCKET, f"{session_id}.mp4")
-
-        # Set redis status
-        await self.redis_client.set(
-            session_id,
-            json.dumps({
-                "status": "STARTED",
-                "local_path": "",
-                "remote_path": ""
-            })
-        )
+        output_path = os.path.join(data_settings.MINIO_BUCKET, f"{uid}.mp4")
 
         # Run the generation in background
         async def run_generation():
@@ -85,4 +74,7 @@ class SadTalkerDeployment:
 
         asyncio.create_task(run_generation())
 
-        return JSONResponse(content={"session_id": session_id})
+        return {
+            "session_id": session_id,
+            "output_path": output_path
+            }

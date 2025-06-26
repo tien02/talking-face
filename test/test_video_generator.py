@@ -4,12 +4,14 @@ import requests
 import base64
 
 # Test input data
-text = "Hello, this is a test of real-time video generation."
-speaker_id = "random"
+text = "What is the difference between SQL and NoSQL databases? When would you use each?"
+speaker_id = "male"
 
 payload = {
     "text": text,
     "speaker_id": speaker_id,
+    "alpha": 0.5,
+    "threshold": 0.9,
 }
 
 start = time.time()
@@ -26,7 +28,7 @@ if response.status_code == 200:
     while True:
         response = requests.get(f"http://0.0.0.0:8091/video?session_id={reponse_data['session_id']}")
 
-        print(response)
+        print(response.text)
 
         if response.status_code==200:
             print(response.text)
